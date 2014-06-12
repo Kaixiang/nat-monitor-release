@@ -1,0 +1,8 @@
+---
+name: pingout
+dependencies:
+- ruby
+
+files:
+- pingout/{Gemfile,Gemfile.lock}
+- pingout/bin/**/*

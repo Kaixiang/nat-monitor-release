@@ -1,0 +1,25 @@
+---
+name: status_checker
+templates:
+  status_checker_ctl: bin/status_checker_ctl
+  config.yml.erb: config/config.yml
+
+packages:
+  - common
+  - ruby
+  - status_checker
+
+properties:
+  status_checker.pingout_nodes:
+    description: "ip list for pingout nodes"
+  status_checker.egress_ip:
+    description: "expected egress ip list"
+  status_checker.poll_interval:
+    description: "polling interval for a pingout test"
+    default: 60
+  status_checker.alert_time_fail:
+    description: "trigger pager duty alert after failing for that much time"
+    default: 5 
+  status_checker.pd_api_key:
+    description: "the pager duty alert service api key"
+

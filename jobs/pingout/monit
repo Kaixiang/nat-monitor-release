@@ -1,0 +1,5 @@
+check process pingout
+  with pidfile /var/vcap/sys/run/pingout/pingout.pid
+  start program "/var/vcap/jobs/pingout/bin/pingout_ctl start"
+  stop program "/var/vcap/jobs/pingout/bin/pingout_ctl stop"
+  group vcap

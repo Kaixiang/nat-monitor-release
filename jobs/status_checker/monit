@@ -1,0 +1,5 @@
+check process status_checker
+  with pidfile /var/vcap/sys/run/status_checker/status_checker.pid
+  start program "/var/vcap/jobs/status_checker/bin/status_checker_ctl start"
+  stop program "/var/vcap/jobs/status_checker/bin/status_checker_ctl stop"
+  group vcap

@@ -1,0 +1,13 @@
+---
+pingout_nodes:
+- 127.0.0.1
+
+egress_ip:
+- 8.8.8.8
+- 8.8.8.9
+
+poll_interval: 5
+
+alert_time_fail: 5
+
+pd_api_key: fake_key

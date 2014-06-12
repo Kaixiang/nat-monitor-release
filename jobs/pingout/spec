@@ -1,0 +1,9 @@
+---
+name: pingout
+templates:
+  pingout_ctl: bin/pingout_ctl
+
+packages:
+  - common
+  - ruby
+  - pingout

@@ -1,0 +1,39 @@
+#!/bin/bash
+export PATH=/var/vcap/packages/ruby/bin:$PATH
+RUN_DIR=/var/vcap/sys/run/pingout
+LOG_DIR=/var/vcap/sys/log/pingout
+PIDFILE=$RUN_DIR/pingout.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "Pingout"
+
+    mkdir -p $RUN_DIR
+    mkdir -p $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+
+    cd /var/vcap/packages/pingout
+
+    exec /var/vcap/packages/ruby/bin/bundle exec \
+         /var/vcap/packages/pingout/bin/pingout \
+         >>$LOG_DIR/pingout.stdout.log \
+         2>>$LOG_DIR/pingout.stderr.log
+
+
+    ;;
+  stop)
+    kill_and_wait $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: pingout_ctl {start|stop}"
+
+    ;;
+
+esac

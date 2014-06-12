@@ -1,0 +1,39 @@
+#!/bin/bash
+export PATH=/var/vcap/packages/ruby/bin:$PATH
+RUN_DIR=/var/vcap/sys/run/status_checker
+LOG_DIR=/var/vcap/sys/log/status_checker
+PIDFILE=$RUN_DIR/status_checker.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "status_checker"
+
+    mkdir -p $RUN_DIR
+    mkdir -p $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+
+    cd /var/vcap/packages/status_checker
+
+    exec /var/vcap/packages/ruby/bin/bundle exec \
+         /var/vcap/packages/status_checker/bin/status_checker -c /var/vcap/jobs/status_checker/config/config.yml\
+         >>$LOG_DIR/status_checker.stdout.log \
+         2>>$LOG_DIR/status_checker.stderr.log
+
+
+    ;;
+  stop)
+    kill_and_wait $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: status_checker_ctl {start|stop}"
+
+    ;;
+
+esac

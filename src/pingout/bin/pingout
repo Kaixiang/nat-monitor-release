@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require 'sinatra'
+require 'net/http'
+require 'uri'
+
+set :port, 80
+set :bind, '0.0.0.0'
+
+get '/ping' do
+  begin
+    Net::HTTP.get(URI('http://ifconfig.me/ip')).tr("\n",'')
+  rescue StandardError
+    'error'
+  end
+end
+
+get '/' do
+  'use /ping to test the ip'
+end

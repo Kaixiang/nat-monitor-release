@@ -1,0 +1,9 @@
+---
+name: status_checker
+dependencies:
+- ruby
+
+files:
+- status_checker/{Gemfile,Gemfile.lock}
+- status_checker/bin/**/*
+

@@ -1,0 +1,16 @@
+---
+pingout_nodes:
+<% properties.status_checker.pingout_nodes.each do |node| %>
+- <%= node %>
+<% end %>
+
+egress_ip:
+<% properties.status_checker.egress_ip.each do |ip| %>
+- <%= ip %>
+<% end %>
+
+poll_interval: <%= properties.status_checker.poll_interval %>
+
+alert_time_fail: <%= properties.status_checker.alert_time_fail %>
+
+pd_api_key: <%= properties.status_checker.pd_api_key %>

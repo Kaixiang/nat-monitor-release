@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'uri'
+require 'yaml'
+require 'optparse'
+require 'pagerduty'
+
+options = {}
+optparse = OptionParser.new do |opts|
+  opts.on('-h', '--help', 'Help Messages') do
+    puts opts
+    exit
+  end
+  opts.on('-c', '--config File', 'The Config file for the checker') do |f|
+    options[:file] = f
+  end
+end
+optparse.parse!
+unless options[:file]
+  puts 'no config file specified, exit'
+  exit
+end
+
+conf = YAML::load(File.open(options[:file]))
+pingout_nodes = conf.fetch('pingout_nodes')
+egress_ips = conf.fetch('egress_ip')
+
+poll_interval = conf.fetch('poll_interval')
+alert_time_fail = conf.fetch('alert_time_fail')
+
+pd_api_key = conf.fetch('pd_api_key')
+
+%w(TERM INT QUIT).each do |signal|
+  trap(signal) do
+    puts 'Shutting down Controller'
+    exit
+  end
+end
+
+pagerduty = Pagerduty.new(pd_api_key)
+
+# Ininitialize accumulate error counter
+errors_accumulated = {}
+pingout_nodes.each do |n|
+  errors_accumulated[n] = 0
+end
+
+# Setup stdout sync to update log in real time
+$stdout.sync = $stderr.sync = true
+
+# infilite loop for polling nodes and doing pager duty
+puts "[INF] #{Time.now} Starting pingout loops"
+loop do
+  sleep poll_interval
+  pingout_nodes.each do |n|
+    begin
+      ping_result = Net::HTTP.get(URI("http://#{n}/ping"))
+      if ping_result =~/error/
+        errors_accumulated[n] +=1
+      else
+        # reset accumulated error
+        errors_accumulated[n] = 0
+        if egress_ips.include?(ping_result)
+          puts "[INF] #{Time.now} pingout test for node #{n} as expected: ip is #{ping_result}"
+        else
+          puts "[ERR] #{Time.now} pingout test for node #{n} error: result is #{ping_result}"
+          pagerduty.trigger("ping out test for node #{n} fails, get result #{ping_result}")
+        end
+      end
+
+    rescue StandardError
+      errors_accumulated[n] += 1
+      puts "[ERR] #{Time.now} node #{n} not responding for #{errors_accumulated[n]} times"
+    end
+
+    if errors_accumulated[n] > alert_time_fail
+      puts "[ERR] #{Time.now} pingout test for #{n} error: timeout accumulated > #{alert_time_fail} times"
+      pagerduty.trigger("ping out test for node #{n} timeout fails")
+    end
+  end
+end
+
