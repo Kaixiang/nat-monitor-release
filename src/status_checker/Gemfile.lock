@@ -1,0 +1,12 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    json (1.8.1)
+    pagerduty (2.0.0)
+      json (>= 1.7.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pagerduty

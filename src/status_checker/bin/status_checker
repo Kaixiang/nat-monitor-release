@@ -50,6 +50,9 @@ end
 $stdout.sync = $stderr.sync = true
 
 # infilite loop for polling nodes and doing pager duty
+timeout_incident_option = { :incident_key => 'pingout_node_timeout' }
+unexpected_eip_incident_option = { :incident_key => 'unexpected_eip' }
+
 puts "[INF] #{Time.now} Starting pingout loops"
 loop do
   sleep poll_interval
@@ -65,7 +68,7 @@ loop do
           puts "[INF] #{Time.now} pingout test for node #{n} as expected: ip is #{ping_result}"
         else
           puts "[ERR] #{Time.now} pingout test for node #{n} error: result is #{ping_result}"
-          pagerduty.trigger("ping out test for node #{n} fails, get result #{ping_result}")
+          pagerduty.trigger("ping out test for node #{n} fails, get result #{ping_result}", unexpected_eip_incident_option)
         end
       end
 
@@ -76,7 +79,7 @@ loop do
 
     if errors_accumulated[n] > alert_time_fail
       puts "[ERR] #{Time.now} pingout test for #{n} error: timeout accumulated > #{alert_time_fail} times"
-      pagerduty.trigger("ping out test for node #{n} timeout fails")
+      pagerduty.trigger("ping out test for node #{n} timeout fails", timeout_incident_option)
     end
   end
 end
